@@ -1,6 +1,7 @@
 import os
 import grpc
-from flask import Flask, render_template
+from flask import Flask, jsonify
+from google.protobuf.json_format import MessageToDict
 from compiles.recommendations_pb2 import RecommendationsRequest, BookCategory
 from compiles.recommendations_pb2_grpc import RecommendationsStub
 
@@ -14,7 +15,7 @@ recommendations_channel = grpc.insecure_channel(
 recommendations_client = RecommendationsStub(recommendations_channel)
 
 
-@app.route("/")
+@app.route("/", methods=['GET'])
 def home_page():
     recommendations_request = RecommendationsRequest(
         user_id=1, category=BookCategory.MYSTERY, max_results=3
@@ -22,7 +23,5 @@ def home_page():
     recommendations_response = recommendations_client.Recommend(
         recommendations_request
     )
-    return render_template(
-        "homepage.html",
-        recommendations=recommendations_response.recommendations,
-    )
+    serialize = MessageToDict(recommendations_response)
+    return jsonify(serialize)
