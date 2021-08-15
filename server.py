@@ -22,12 +22,11 @@ class RecommendationsService(recommendations_pb2_grpc.RecommendationsServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     recommendations_pb2_grpc.add_RecommendationsServicer_to_server(RecommendationsService(), server)
+    print("Starting server. Listening on port 50051.")
     server.add_insecure_port('[::]:50051')
     server.start()
-    print("Server is running on localhost:50051 Use Ctrl-C to exit ")
 
     def handle_sigterm(*_):
-        print("Received shutdown signal")
         all_rpcs_done_event = server.stop(30)
         all_rpcs_done_event.wait(30)
         print("Shut down gracefully")
